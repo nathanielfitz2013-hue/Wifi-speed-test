@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse Speedtest</title>
+<style>
+:root{color-scheme:dark;--bg:#080b14;--panel:#111827;--muted:#9ca8bd;--text:#f4f7ff;--accent:#7c5cff;--cyan:#39d9ff;--line:#253149}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(ellipse at 50% 0%,#1d1b46 0%,#0b1020 42%,var(--bg) 75%);color:var(--text);display:flex;justify-content:center;padding:28px 16px}
+.wrap{width:min(960px,100%)}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;font-size:20px;letter-spacing:.3px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;color:#080b14;font-size:20px;box-shadow:0 0 26px #7c5cff55}.pill{border:1px solid var(--line);border-radius:99px;padding:7px 11px;color:var(--muted);font-size:12px}
+h1{font-size:clamp(28px,5vw,42px);text-align:center;margin:10px 0 8px;letter-spacing:-1.5px} .sub{text-align:center;color:var(--muted);margin:0 0 28px}
+.main{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.panel{background:linear-gradient(145deg,#141c2d,#0d1322);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 20px 70px #0003}.test-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:370px}
+.gauge{width:min(270px,72vw);aspect-ratio:1;position:relative;display:grid;place-items:center;margin:3px auto 20px}.gauge svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}.track{fill:none;stroke:#253149;stroke-width:10}.progress{fill:none;stroke:url(#grad);stroke-width:10;stroke-linecap:round;stroke-dasharray:691.15;stroke-dashoffset:691.15;transition:stroke-dashoffset .25s linear;filter:drop-shadow(0 0 7px #7c5cff66)}.reading{text-align:center;z-index:1}.value{font-size:58px;font-weight:800;letter-spacing:-2px;line-height:1}.unit{color:var(--muted);font-size:14px;margin-top:7px}.phase{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--cyan);margin-bottom:12px}
+button{border:0;cursor:pointer;border-radius:14px;background:linear-gradient(100deg,var(--accent),#5e86ff);color:white;font-size:16px;font-weight:750;padding:15px 28px;min-width:190px;box-shadow:0 8px 24px #6655ff40;transition:transform .15s,opacity .15s}button:hover{transform:translateY(-2px)}button:disabled{opacity:.55;cursor:wait;transform:none}.hint{font-size:12px;color:var(--muted);text-align:center;max-width:340px;line-height:1.5;margin-top:13px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.metric{padding:17px;border:1px solid var(--line);border-radius:17px;background:#0c1321}.metric-top{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.dot{width:9px;height:9px;border-radius:50%;background:var(--cyan)}.dot.purple{background:var(--accent)}.metric-num{font-size:30px;font-weight:750;margin-top:13px;letter-spacing:-1px}.metric-num small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}.section-title{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:5px 0 12px}.info-row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #202b40;font-size:13px}.info-row:last-child{border-bottom:0}.info-row span:first-child{color:var(--muted)}.info-row span:last-child{text-align:right;overflow-wrap:anywhere}.status{height:4px;background:#263149;border-radius:10px;overflow:hidden;margin-top:17px}.status div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .25s}
+.note{margin:18px 2px 0;color:#8794ab;font-size:12px;line-height:1.55;text-align:center}
+@media(max-width:700px){.main{grid-template-columns:1fr}.test-panel{min-height:340px}.panel{padding:20px}.metrics{grid-template-columns:1fr 1fr}header{margin-bottom:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand"><div class="logo">ϟ</div>Pulse <span style="font-weight:500;color:var(--muted)">Speedtest</span></div><div class="pill">BROWSER TEST</div></header>
+<h1>How fast is your internet?</h1><p class="sub">Check your connection in a few seconds.</p>
+<div class="main">
+<section class="panel test-panel">
+<div class="gauge">
+<svg viewBox="0 0 240 240" aria-hidden="true"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#39d9ff"/></linearGradient></defs><circle class="track" cx="120" cy="120" r="110"/><circle id="arc" class="progress" cx="120" cy="120" r="110"/></svg>
+<div class="reading"><div id="phase" class="phase">Ready to test</div><div id="speed" class="value">—</div><div class="unit">Mbps</div></div>
+</div>
+<button id="start">Start speed test</button>
+<div id="hint" class="hint">For the most accurate result, pause downloads and close other bandwidth-heavy apps.</div>
+<div class="status"><div id="bar"></div></div>
+</section>
+<section class="panel">
+<div class="metrics">
+<div class="metric"><div class="metric-top"><i class="dot"></i> Download</div><div class="metric-num" id="download">— <small>Mbps</small></div></div>
+<div class="metric"><div class="metric-top"><i class="dot purple"></i> Upload</div><div class="metric-num" id="upload">— <small>Mbps</small></div></div>
+<div class="metric"><div class="metric-top">↔ Ping</div><div class="metric-num" id="ping">— <small>ms</small></div></div>
+<div class="metric"><div class="metric-top">⌁ Jitter</div><div class="metric-num" id="jitter">— <small>ms</small></div></div>
+</div>
+<div class="section-title">What is your Wi-Fi good for?</div>
+<div class="info-row"><span>Everyday browsing</span><span id="browseVerdict">Run a test</span></div>
+<div class="info-row"><span>HD / 4K streaming</span><span id="streamVerdict">Run a test</span></div>
+<div class="info-row"><span>Online gaming</span><span id="gameVerdict">Run a test</span></div>
+<div class="info-row"><span>Video calls</span><span id="callVerdict">Run a test</span></div>
+<div class="info-row"><span>Large downloads</span><span id="downloadVerdict">Run a test</span></div>
+<div class="info-row"><span>Connection details</span><span></span></div>
+<div class="info-row"><span>Test server</span><span>Cloudflare network</span></div>
+<div class="info-row"><span>Test status</span><span id="statusText">Not started</span></div>
+<div class="info-row"><span>Measurement</span><span>Browser-based estimate</span></div>
+<p class="note">Results can vary with Wi-Fi signal, network congestion, your device, and the test server. Upload testing sends sample data to Cloudflare. This page does not need your location or account details.</p>
+</section>
+</div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const arc = $('arc'), circumference = 2 * Math.PI * 110;
+arc.style.strokeDasharray = circumference;
+arc.style.strokeDashoffset = circumference;
+let running = false;
+function setProgress(p){arc.style.strokeDashoffset = circumference * (1-Math.max(0,Math.min(1,p)));$('bar').style.width=(p*100)+'%'}
+function display(id,n,unit){$(id).innerHTML=(Number.isFinite(n)?(n<10?n.toFixed(2):n.toFixed(1)):'—')+' <small>'+unit+'</small>'}
+function phase(name,speed='—'){ $('phase').textContent=name; $('speed').textContent=speed; }
+function format(n){return Number.isFinite(n)?(n<10?n.toFixed(2):n.toFixed(1)):'—'}
+function assess(id, ok, maybe, no){$(id).textContent=ok?'Great':maybe?'Good':'May struggle';}
+function updateUseCases(d,u,p){
+  // These are rough guideposts, not guarantees; latency matters for gaming/calls.
+  $('browseVerdict').textContent=d>=3?'Great':d>=1?'Okay':'May be slow';
+  $('streamVerdict').textContent=d>=25?'4K ready':d>=5?'HD ready':'May buffer';
+  $('gameVerdict').textContent=p<=30&&p>0?'Great ping':p<=70&&p>0?'Playable':'High ping';
+  $('callVerdict').textContent=u>=5&&p<=100?'Good for calls':u>=1?'Basic calls':'May lag';
+  $('downloadVerdict').textContent=d>=100?'Very fast':d>=25?'Fairly fast':d>=5?'Moderate':'Slow for big files';
+}
+async function timedFetch(url, options={}){const t=performance.now();const response=await fetch(url,{cache:'no-store',...options});if(!response.ok)throw new Error('Network request failed ('+response.status+')');return {response,ms:performance.now()-t}}
+async function runPing(){
+ const samples=[];
+ for(let i=0;i<5;i++){const {ms}=await timedFetch('https://speed.cloudflare.com/__down?bytes=0&cb='+Math.random());samples.push(ms);$('ping').innerHTML=format(samples.reduce((a,b)=>a+b,0)/samples.length)+' <small>ms</small>';await new Promise(r=>setTimeout(r,100));}
+ const mean=samples.reduce((a,b)=>a+b,0)/samples.length;
+ const jit=samples.slice(1).reduce((a,b)=>a+Math.abs(b-mean),0)/(samples.length-1);
+ display('jitter',jit,'ms');return mean;
+}
+async function runDownload(){
+ let total=0, start=performance.now(), last=0, bytes=0;
+ // Increase payload sizes progressively to get a useful measurement on slow and fast connections.
+ for(const size of [1000000,5000000,10000000,20000000]){
+  const {response}=await timedFetch('https://speed.cloudflare.com/__down?bytes='+size+'&cb='+Math.random());
+  const reader=response.body?.getReader();
+  if(reader){while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;const elapsed=(performance.now()-start)/1000;const mbps=bytes*8/elapsed/1e6;phase('Downloading',format(mbps));setProgress(.2+Math.min(.55,elapsed/12*.55));display('download',mbps,'Mbps');if(elapsed>12)break;}}
+  else {const blob=await response.blob();bytes+=blob.size;}
+  const elapsed=(performance.now()-start)/1000;
+  total=bytes*8/Math.max(elapsed,.001)/1e6;last=elapsed;
+  if(elapsed>10)break;
+ }
+ return total;
+}
+async function runUpload(){
+ const sizes=[1000000,5000000];let totalBytes=0,start=performance.now(),result=0;
+ for(const size of sizes){
+  const data=new Blob([crypto.getRandomValues(new Uint8Array(Math.min(size,65536)))]);
+  // Build a larger payload from repeated chunks without needing extra permissions.
+  const parts=[];let remaining=size;while(remaining>0){const take=Math.min(remaining,data.size);parts.push(data.slice(0,take));remaining-=take;}
+  const payload=new Blob(parts);
+  const t=performance.now();
+  const response=await fetch('https://speed.cloudflare.com/__up?cb='+Math.random(),{method:'POST',body:payload,cache:'no-store'});
+  if(!response.ok)throw new Error('Upload request failed ('+response.status+')');
+  await response.text().catch(()=>{});
+  totalBytes+=size;
+  result=size*8/Math.max((performance.now()-t)/1000,.001)/1e6;
+  display('upload',result,'Mbps');phase('Uploading',format(result));setProgress(.75+Math.min(.2,(performance.now()-start)/8000*.2));
+  if(performance.now()-start>8000)break;
+ }
+ return result;
+}
+$('start').addEventListener('click',async()=>{
+ if(running)return;running=true;$('start').disabled=true;$('start').textContent='Testing…';$('statusText').textContent='Running';$('hint').textContent='Measuring ping, download and upload. Keep this tab open.';
+ ['download','upload','ping','jitter'].forEach(id=>display(id,NaN,id==='ping'||id==='jitter'?'ms':'Mbps'));setProgress(0);
+ try{
+  phase('Measuring ping');const p=await runPing();display('ping',p,'ms');setProgress(.2);
+  phase('Downloading');const d=await runDownload();display('download',d,'Mbps');setProgress(.75);
+  phase('Uploading');const u=await runUpload();display('upload',u,'Mbps');setProgress(1);
+  phase('Test complete',format(d));updateUseCases(d,u,p);$('statusText').textContent='Complete';$('hint').textContent='These recommendations are rough estimates based on your measured speed and ping. Wi-Fi signal, other devices, and service requirements can affect real-world performance.';$('start').textContent='Run test again';
+ }catch(e){
+  phase('Test failed');$('statusText').textContent='Could not complete';$('hint').textContent='A request was blocked or the test server was unreachable. Check your connection, disable strict content blockers for this page, and try again. ('+e.message+')';$('start').textContent='Try again';
+ }finally{running=false;$('start').disabled=false;}
+});
+</script>
+</body>
+</html>
+</html>
+</html>
